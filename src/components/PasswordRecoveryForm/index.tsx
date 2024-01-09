@@ -4,10 +4,16 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
 import { supabaseClient } from "@/config/supabase";
 
+type FormValues = {
+  email: string;
+  password: string;
+  confirmPassword: string;
+};
+
 const PasswordRecoveryForm = () => {
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
-  const validationSchema = Yup.object().shape({
+  const validationSchema: Yup.SchemaOf<FormValues> = Yup.object().shape({
     email: Yup.string().email("Email inválido").required("Campo obrigatório."),
     password: Yup.string().required("Campo obrigatório."),
     confirmPassword: Yup.string()
@@ -20,15 +26,11 @@ const PasswordRecoveryForm = () => {
     control,
     formState: { errors },
     reset,
-  } = useForm({
+  } = useForm<FormValues>({
     resolver: yupResolver(validationSchema),
   });
 
-  const onSubmit = async (params: {
-    email: string;
-    password: string;
-    confirmPassword: string;
-  }) => {
+  const onSubmit = async (params: FormValues) => {
     try {
       await supabaseClient.auth.updateUser({
         password: params.password,
@@ -63,7 +65,7 @@ const PasswordRecoveryForm = () => {
             Email:
           </label>
           <Controller
-            name="email"
+            name={"email" as any}
             control={control}
             render={({ field }) => (
               <input
